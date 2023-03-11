@@ -94,7 +94,7 @@ def get_yolo5_model(model_type, num_feature_layers, num_anchors, num_classes, in
     return model_body, backbone_len
 
 
-def get_yolo5_train_model(model_type, anchors, num_classes, weights_path=None, freeze_level=1, optimizer=Adam(lr=1e-3, decay=0), label_smoothing=0, elim_grid_sense=True, model_pruning=False, pruning_end_step=10000):
+def get_yolo5_train_model(model_type, anchors, num_classes, weights_path=None, freeze_level=1, optimizer=Adam(learning_rate=1e-3, weight_decay=0), label_smoothing=0, elim_grid_sense=True, model_pruning=False, pruning_end_step=10000):
     '''create the training model, for YOLOv5'''
     #K.clear_session() # get a new session
     num_anchors = len(anchors)

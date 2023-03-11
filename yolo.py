@@ -310,16 +310,10 @@ def detect_video(yolo, video_path, output_path=""):
 
 
 def detect_img(yolo):
-    while True:
-        img = input('Input image filename:')
-        try:
-            image = Image.open(img).convert('RGB')
-        except:
-            print('Open Error! Try again!')
-            continue
-        else:
-            r_image, _, _, _ = yolo.detect_image(image)
-            r_image.show()
+    img = "keras-YOLOv3-model-set/example/kite.jpg"
+    image = Image.open(img).convert('RGB')
+    r_image, _, _, _ = yolo.detect_image(image)
+    r_image.save("output.jpg")
 
 
 def main():
