@@ -169,7 +169,7 @@ yolo3_tiny_model_map = {
     'tiny_yolo3_efficientnet_lite': [tiny_yolo3lite_efficientnet_body, 235, None],
 
     'tiny_yolo3_darknet': [custom_tiny_yolo3_body, 20, os.path.join(ROOT_PATH, 'weights', 'yolov3-tiny.h5')],
-    'thin_tiny_yolo3_darknet': [thin_custom_tiny_yolo3_body, 20, os.path.join(ROOT_PATH, 'weights', 'yolov3-tiny.h5')],
+    'tiny_yolo3_darknet_thin': [thin_custom_tiny_yolo3_body, 20, os.path.join(ROOT_PATH, 'weights', 'yolov3-tiny.h5')],
  
     #Doesn't have pretrained weights, so no need to return backbone length
     'tiny_yolo3_darknet_lite': [tiny_yolo3lite_body, 0, None],
