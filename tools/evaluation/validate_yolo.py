@@ -7,8 +7,8 @@ import numpy as np
 from PIL import Image
 from operator import mul
 from functools import reduce
-import MNN
-import onnxruntime
+# import MNN
+# import onnxruntime
 from tensorflow.keras.models import load_model
 import tensorflow.keras.backend as K
 from tensorflow.lite.python import interpreter as interpreter_wrapper

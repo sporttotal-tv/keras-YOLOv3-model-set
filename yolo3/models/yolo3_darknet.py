@@ -218,9 +218,7 @@ def custom_tiny_yolo3_body(inputs, num_anchors, num_classes, weights_path):
     '''Create a custom Tiny YOLO_v3 model, use
        pre-trained weights from darknet and fit
        for our target classes.'''
-    #TODO: get darknet class number from class file
-    num_classes_coco = 80
-    base_model = tiny_yolo3_body(inputs, num_anchors, num_classes_coco)
+    base_model = tiny_yolo3_body(inputs, num_anchors, num_classes)
     base_model.load_weights(weights_path, by_name=False)
     print('Load weights {}.'.format(weights_path))
 
