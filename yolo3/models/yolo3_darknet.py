@@ -240,7 +240,7 @@ def thin_tiny_yolo3_body(inputs, num_anchors, num_classes):
 
     #feature map 1 output (13x13 for 416 input)
     y1 = compose(
-            DarknetConv2D_BN_Leaky(512, (3,3)),
+            DarknetConv2D_BN_Leaky(512/4, (3,3)),
             DarknetConv2D(num_anchors*(num_classes+5), (1,1), name='predict_conv_1'))(x1)
 
     #upsample fpn merge for feature map 1 & 2
