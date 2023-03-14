@@ -203,7 +203,7 @@ class YOLO(object):
         else:
             raise ValueError('Unsupported model type')
 
-        inference_model.summary()
+        print(inference_model.summary())
         return inference_model
 
     def predict(self, image_data, image_shape):
