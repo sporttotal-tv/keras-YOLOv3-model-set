@@ -309,9 +309,8 @@ def detect_video(yolo, video_path, output_path=""):
     cv2.destroyAllWindows()
 
 
-def detect_img(yolo):
-    img = "keras-YOLOv3-model-set/example/kite.jpg"
-    image = Image.open(img).convert('RGB')
+def detect_img(yolo, image_path):
+    image = Image.open(image_path).convert('RGB')
     r_image, _, _, _ = yolo.detect_image(image)
     r_image.save("output.jpg")
 
@@ -371,8 +370,8 @@ def main():
     Command line positional arguments -- for video detection mode
     '''
     parser.add_argument(
-        "--input", nargs='?', type=str,required=False,default='./path2your_video',
-        help = "Video input path"
+        "--input", nargs='?', type=str, required=False, default='./path2your_video',
+        help = "input path (video or image)"
     )
 
     parser.add_argument(
@@ -420,7 +419,7 @@ def main():
         print("Image detection mode")
         if "input" in args:
             print(" Ignoring remaining command line arguments: " + args.input + "," + args.output)
-        detect_img(yolo)
+        detect_img(yolo, args.input)
     elif "input" in args:
         detect_video(yolo, args.input, args.output)
     else:
