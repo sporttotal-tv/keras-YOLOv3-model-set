@@ -48,7 +48,7 @@ def validate_yolo_model(model, image_file, anchors, class_names, model_input_sha
     return
 
 
-def validate_yolo_model_tflite(interpreter, image_file, anchors, class_names, elim_grid_sense, v5_decode, loop_count, output_path):
+def validate_yolo_model_tflite(interpreter, image_file, anchors, class_names, elim_grid_sense, v5_decode, loop_count, output_path, uint8_mode):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
     #print(input_details)
@@ -65,7 +65,7 @@ def validate_yolo_model_tflite(interpreter, image_file, anchors, class_names, el
     width = input_details[0]['shape'][2]
     model_input_shape = (height, width)
 
-    image_data = preprocess_image(img, model_input_shape)
+    image_data = preprocess_image(img, model_input_shape, uint8_mode)
     #origin image shape, in (height, width) format
     image_shape = img.size[::-1]
 
@@ -83,6 +83,10 @@ def validate_yolo_model_tflite(interpreter, image_file, anchors, class_names, el
     prediction = []
     for output_detail in output_details:
         output_data = interpreter.get_tensor(output_detail['index'])
+        if uint8_mode:
+            scale = output_detail['quantization'][0] 
+            zero_point = output_detail['quantization'][1]
+            output_data = (output_data - zero_point) * scale
         prediction.append(output_data)
 
     handle_prediction(prediction, image_file, image, image_shape, anchors, class_names, model_input_shape, elim_grid_sense, v5_decode, output_path)
@@ -463,6 +467,8 @@ def main():
     parser.add_argument('--v5_decode', help="Use YOLOv5 prediction decode", default=False, action="store_true")
     parser.add_argument('--loop_count', help='loop inference for certain times', type=int, default=1)
     parser.add_argument('--output_path', help='output path to save predict result, default=%(default)s', type=str, required=False, default=None)
+    parser.add_argument('--uint8_mode', help='Store True if the model was quantized to uint8', action='store_true')
+
 
     args = parser.parse_args()
 
@@ -490,7 +496,7 @@ def main():
     for image_file in image_files:
         # support of tflite model
         if args.model_path.endswith('.tflite'):
-            validate_yolo_model_tflite(model, image_file, anchors, class_names, args.elim_grid_sense, args.v5_decode, args.loop_count, args.output_path)
+            validate_yolo_model_tflite(model, image_file, anchors, class_names, args.elim_grid_sense, args.v5_decode, args.loop_count, args.output_path, args.uint8_mode)
         # support of MNN model
         elif args.model_path.endswith('.mnn'):
             validate_yolo_model_mnn(model, session, image_file, anchors, class_names, args.elim_grid_sense, args.v5_decode, args.loop_count, args.output_path)
