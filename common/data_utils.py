@@ -1136,7 +1136,7 @@ def preprocess_image(image, model_input_shape, uint8_mode=False):
     resized_image = letterbox_resize(image, model_input_shape[::-1])
     if uint8_mode:
         image_data = np.asarray(resized_image).astype('uint8')
-    else
+    else:
         image_data = np.asarray(resized_image).astype('float32')
         image_data = normalize_image(image_data)
     image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
