@@ -217,6 +217,12 @@ def main(args):
     # Unfreeze the whole network for further tuning
     # NOTE: more GPU memory is required after unfreezing the body
     print("Unfreeze and continue training, to fine-tune.")
+
+    if args.quantize_aware_training:
+        import tensorflow_model_optimization as tfmot
+        quantize_model = tfmot.quantization.keras.quantize_model
+        model = quantize_model(model)
+
     if args.gpu_num >= 2:
         with strategy.scope():
             for i in range(len(model.layers)):
@@ -227,6 +233,7 @@ def main(args):
         for i in range(len(model.layers)):
             model.layers[i].trainable = True
         model.compile(optimizer=optimizer, loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
+    print(model.summary())
 
     print('Train on {} samples, val on {} samples, with batch size {}, input_shape {}.'.format(num_train, num_val, args.batch_size, input_shape))
     #model.fit_generator(train_data_generator,
@@ -309,6 +316,9 @@ if __name__ == '__main__':
         help='Number of GPU to use, default=%(default)s')
     parser.add_argument('--model_pruning', default=False, action="store_true",
         help='Use model pruning for optimization, only for TF 1.x')
+    parser.add_argument('--quantize_aware_training', default=False, action="store_true",
+        help='Use quantization aware training')
+
 
     # Evaluation options
     parser.add_argument('--eval_online', default=False, action="store_true",
