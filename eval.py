@@ -16,8 +16,8 @@ from tqdm import tqdm
 from tensorflow.keras.models import load_model
 import tensorflow.keras.backend as K
 import tensorflow as tf
-import MNN
-import onnxruntime
+# import MNN
+# import onnxruntime
 
 from yolo5.postprocess_np import yolo5_postprocess_np
 from yolo3.postprocess_np import yolo3_postprocess_np
