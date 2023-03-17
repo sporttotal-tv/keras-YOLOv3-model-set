@@ -1118,7 +1118,7 @@ def denormalize_image(image):
     return image
 
 
-def preprocess_image(image, model_input_shape, uint8_mode=False):
+def preprocess_image(image, model_input_shape, uint8_mode=False, input_scale=None, input_zero_point=None):
     """
     Prepare model input image data with letterbox
     resize, normalize and dim expansion
@@ -1134,11 +1134,14 @@ def preprocess_image(image, model_input_shape, uint8_mode=False):
     """
     #resized_image = cv2.resize(image, model_input_shape[::-1], cv2.INTER_AREA)
     resized_image = letterbox_resize(image, model_input_shape[::-1])
+    image_data = normalize_image(image_data)
+    
+    output_type = 'float32'
     if uint8_mode:
-        image_data = np.asarray(resized_image).astype('uint8')
-    else:
-        image_data = np.asarray(resized_image).astype('float32')
-        image_data = normalize_image(image_data)
+        image_data = image_data / input_scale + input_zero_point
+        output_type = 'uint8'
+
+    image_data = np.asarray(resized_image).astype(output_type)
     image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
     return image_data
 

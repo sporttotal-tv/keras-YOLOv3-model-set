@@ -63,9 +63,11 @@ def validate_yolo_model_tflite(interpreter, image_file, anchors, class_names, el
 
     height = input_details[0]['shape'][1]
     width = input_details[0]['shape'][2]
-    model_input_shape = (height, width)
 
-    image_data = preprocess_image(img, model_input_shape, uint8_mode)
+    model_input_shape = (height, width)
+    input_scale, input_zero_point = input_details[0]['quantization']
+
+    image_data = preprocess_image(img, model_input_shape, uint8_mode, input_scale, input_zero_point)
     #origin image shape, in (height, width) format
     image_shape = img.size[::-1]
 
