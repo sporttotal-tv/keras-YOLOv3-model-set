@@ -276,6 +276,12 @@ def get_yolo3_train_model(model_type, anchors, num_classes, quantize_aware_train
     if weights_path:
         model_body.load_weights(weights_path, by_name=True)#, skip_mismatch=True)
         print('Load weights {}.'.format(weights_path))
+        
+    if quantize_aware_training:
+        import tensorflow_model_optimization as tfmot
+        quantize_model = tfmot.quantization.keras.quantize_model
+        print('Quantize aware training')
+        model_body = quantize_model(model_body)
 
     if freeze_level in [1, 2]:
         # Freeze the backbone part or freeze all but final feature map & input layers.
@@ -297,12 +303,6 @@ def get_yolo3_train_model(model_type, anchors, num_classes, quantize_aware_train
     loss_dict = {'location_loss':location_loss, 'confidence_loss':confidence_loss, 'class_loss':class_loss}
     add_metrics(model, loss_dict)
     
-    if quantize_aware_training:
-        import tensorflow_model_optimization as tfmot
-        quantize_model = tfmot.quantization.keras.quantize_model
-        print('Quantize aware training')
-        model = quantize_model(model)
-
     model.compile(optimizer=optimizer, loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # use custom yolo_loss Lambda layer
 
     return model
