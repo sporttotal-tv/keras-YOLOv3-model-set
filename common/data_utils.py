@@ -1134,14 +1134,15 @@ def preprocess_image(image, model_input_shape, uint8_mode=False, input_scale=Non
     """
     #resized_image = cv2.resize(image, model_input_shape[::-1], cv2.INTER_AREA)
     resized_image = letterbox_resize(image, model_input_shape[::-1])
-    resized_image = normalize_image(resized_image)
+    image_data = np.asarray(resized_image)
+    image_data = normalize_image(image_data)
     
     output_type = 'float32'
     if uint8_mode:
-        resized_image = resized_image / input_scale + input_zero_point
+        image_data = image_data / input_scale + input_zero_point
         output_type = 'uint8'
 
-    image_data = np.asarray(resized_image).astype(output_type)
+    image_data = image_data.astype(output_type)
     image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
     return image_data
 
