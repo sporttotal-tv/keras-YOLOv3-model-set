@@ -159,11 +159,11 @@ def main(args):
         print ('Number of devices: {}'.format(strategy.num_replicas_in_sync))
         with strategy.scope():
             # get multi-gpu train model
-            model = get_train_model(args.model_type, anchors, num_classes, weights_path=args.weights_path, freeze_level=freeze_level, optimizer=optimizer, label_smoothing=args.label_smoothing, elim_grid_sense=args.elim_grid_sense, model_pruning=args.model_pruning, pruning_end_step=pruning_end_step)
+            model = get_train_model(args.model_type, anchors, num_classes, args.quantize_aware_training, weights_path=args.weights_path, freeze_level=freeze_level, optimizer=optimizer, label_smoothing=args.label_smoothing, elim_grid_sense=args.elim_grid_sense, model_pruning=args.model_pruning, pruning_end_step=pruning_end_step)
 
     else:
         # get normal train model
-        model = get_train_model(args.model_type, anchors, num_classes, weights_path=args.weights_path, freeze_level=freeze_level, optimizer=optimizer, label_smoothing=args.label_smoothing, elim_grid_sense=args.elim_grid_sense, model_pruning=args.model_pruning, pruning_end_step=pruning_end_step)
+        model = get_train_model(args.model_type, anchors, num_classes, args.quantize_aware_training, weights_path=args.weights_path, freeze_level=freeze_level, optimizer=optimizer, label_smoothing=args.label_smoothing, elim_grid_sense=args.elim_grid_sense, model_pruning=args.model_pruning, pruning_end_step=pruning_end_step)
 
     model.summary()
 
@@ -217,11 +217,6 @@ def main(args):
     # Unfreeze the whole network for further tuning
     # NOTE: more GPU memory is required after unfreezing the body
     print("Unfreeze and continue training, to fine-tune.")
-
-    if args.quantize_aware_training:
-        import tensorflow_model_optimization as tfmot
-        quantize_model = tfmot.quantization.keras.quantize_model
-        model = quantize_model(model)
 
     if args.gpu_num >= 2:
         with strategy.scope():
