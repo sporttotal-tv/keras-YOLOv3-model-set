@@ -4,6 +4,7 @@
 Train YOLO model for your own dataset.
 """
 import os, time, random, argparse
+import pathlib
 import numpy as np
 import tensorflow.keras.backend as K
 #from tensorflow.keras.utils import multi_gpu_model
@@ -248,7 +249,15 @@ def main(args):
     # Finally store model
     if args.model_pruning:
         model = sparsity.strip_pruning(model)
-    model.save(os.path.join(log_dir, 'trained_final.h5'))
+        
+    if args.quantize_aware_training:
+        converter = tf.lite.TFLiteConverter.from_keras_model(model)
+        converter.optimizations = [tf.lite.Optimize.DEFAULT]
+        quantized_tflite_model = converter.convert()
+        quantized_tflite_file = pathlib.Path('trained_final_uint8.tflite')
+        quantized_tflite_file.write_bytes(quantized_tflite_file)
+    else:
+        model.save(os.path.join(log_dir, 'trained_final.h5'))
 
 
 
