@@ -7,6 +7,7 @@ import os, time, random, argparse
 import pathlib
 import numpy as np
 import tensorflow.keras.backend as K
+import tensorflow_model_optimization as tfmot
 #from tensorflow.keras.utils import multi_gpu_model
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint, ReduceLROnPlateau, LearningRateScheduler, EarlyStopping, TerminateOnNaN, LambdaCallback
 from tensorflow_model_optimization.sparsity import keras as sparsity
@@ -28,6 +29,16 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import tensorflow as tf
 optimize_tf_gpu(tf, K)
+
+
+def change_input_size(model,h,w,ch=3):
+    with tfmot.quantization.keras.quantize_scope():
+        # loaded_model = tf.keras.models.load_model(keras_quantized_model_file)
+        model.layers[0]._batch_input_shape = (None,h,w,ch)
+        new_model = tf.keras.models.model_from_json(model.to_json())
+        for layer,new_layer in zip(model.layers,new_model.layers):
+            new_layer.set_weights(layer.get_weights())
+    return new_model
 
 
 def main(args):
@@ -251,11 +262,17 @@ def main(args):
         model = sparsity.strip_pruning(model)
         
     if args.quantize_aware_training:
+        model = tf.keras.Model(
+            model.get_layer('image_input').input,
+            [model.get_layer('quant_predict_conv_1').output, 
+             model.get_layer('quant_predict_conv_2').output])
+
+        model = change_input_size(model, 768, 768)
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
         quantized_tflite_model = converter.convert()
         quantized_tflite_file = pathlib.Path('trained_final_uint8.tflite')
-        quantized_tflite_file.write_bytes(quantized_tflite_file)
+        quantized_tflite_file.write_bytes(quantized_tflite_model)
     else:
         model.save(os.path.join(log_dir, 'trained_final.h5'))
 

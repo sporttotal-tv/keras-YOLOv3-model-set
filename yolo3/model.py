@@ -291,7 +291,7 @@ def get_yolo3_train_model(model_type, anchors, num_classes, quantize_aware_train
     elif freeze_level == 0:
         # Unfreeze all layers.
         for i in range(len(model_body.layers)):
-            model_body.layers[i].trainable= True
+            model_body.layers[i].trainable = True
         print('Unfreeze all of the layers.')
 
     model_loss, location_loss, confidence_loss, class_loss = Lambda(yolo3_loss, name='yolo_loss',
