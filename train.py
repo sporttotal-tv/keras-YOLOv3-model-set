@@ -267,7 +267,7 @@ def main(args):
             [model.get_layer('quant_predict_conv_1').output, 
              model.get_layer('quant_predict_conv_2').output])
 
-        model = change_input_size(model, 768, 768)
+        model = change_input_size(model, *(args.model_input_shape))
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
         quantized_tflite_model = converter.convert()
