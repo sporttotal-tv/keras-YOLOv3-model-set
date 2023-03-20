@@ -41,6 +41,33 @@ def change_input_size(model,h,w,ch=3):
     return new_model
 
 
+def save_quantized_model(model, log_dir, epoch=1):
+    os.makedirs(log_dir, exist_ok=True)    
+
+    model = tf.keras.Model(
+        model.get_layer('image_input').input,
+        [model.get_layer('quant_predict_conv_1').output, 
+            model.get_layer('quant_predict_conv_2').output])
+
+    model = change_input_size(model, *(args.model_input_shape))
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.inference_input_type = tf.uint8
+    converter.inference_output_type = tf.uint8
+    quantized_tflite_model = converter.convert()
+    quantized_tflite_file = pathlib.Path(os.path.join(log_dir, f'trained_{epoch}_uint8.tflite'))
+    quantized_tflite_file.write_bytes(quantized_tflite_model)
+
+
+class QuantizeModelCheckpoint(ModelCheckpoint):
+    def on_epoch_end(self, epoch, logs=None):
+        self.epochs_since_last_save += 1
+        
+        log_dir = 'logs/quant'
+
+        save_quantized_model(self.model, log_dir, epoch=epoch)
+
+
 def main(args):
     log_dir = os.path.join('logs', '000')
     class_names = get_classes(args.classes_path)
@@ -67,12 +94,23 @@ def main(args):
         save_weights_only=False,
         save_best_only=True,
         period=1)
+    if args.quantize_aware_training:
+        checkpoint_q = QuantizeModelCheckpoint(os.path.join(log_dir, 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}-quant.h5'),
+            monitor='val_loss',
+            mode='min',
+            verbose=1,
+            save_weights_only=False,
+            save_best_only=True,
+            period=1)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, mode='min', patience=10, verbose=1, cooldown=0, min_lr=1e-10)
     early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=50, verbose=1, mode='min')
     checkpoint_clean = CheckpointCleanCallBack(log_dir, max_val_keep=5, max_eval_keep=2)
     terminate_on_nan = TerminateOnNaN()
 
     callbacks = [logging, checkpoint, reduce_lr, early_stopping, terminate_on_nan, checkpoint_clean]
+    
+    if args.quantize_aware_training:
+        callbacks.append(checkpoint_q)
 
     # get train&val dataset
     dataset = get_dataset(args.annotation_file)
@@ -261,19 +299,7 @@ def main(args):
         model = sparsity.strip_pruning(model)
         
     if args.quantize_aware_training:
-        model = tf.keras.Model(
-            model.get_layer('image_input').input,
-            [model.get_layer('quant_predict_conv_1').output, 
-             model.get_layer('quant_predict_conv_2').output])
-
-        model = change_input_size(model, *(args.model_input_shape))
-        converter = tf.lite.TFLiteConverter.from_keras_model(model)
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        converter.inference_input_type = tf.uint8
-        converter.inference_output_type = tf.uint8
-        quantized_tflite_model = converter.convert()
-        quantized_tflite_file = pathlib.Path('trained_final_uint8.tflite')
-        quantized_tflite_file.write_bytes(quantized_tflite_model)
+        save_quantized_model(model, log_dir, epoch='last')
     else:
         model.save(os.path.join(log_dir, 'trained_final.h5'))
 
