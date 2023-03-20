@@ -177,7 +177,7 @@ def main(args):
         # get normal train model
         model = get_train_model(args.model_type, anchors, num_classes, args.quantize_aware_training, weights_path=args.weights_path, freeze_level=freeze_level, optimizer=optimizer, label_smoothing=args.label_smoothing, elim_grid_sense=args.elim_grid_sense, model_pruning=args.model_pruning, pruning_end_step=pruning_end_step)
 
-    model.summary()
+    # model.summary()
 
     # Transfer training some epochs with frozen layers first if needed, to get a stable loss.
     initial_epoch = args.init_epoch
@@ -240,7 +240,6 @@ def main(args):
         for i in range(len(model.layers)):
             model.layers[i].trainable = True
         model.compile(optimizer=optimizer, loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
-    print(model.summary())
 
     print('Train on {} samples, val on {} samples, with batch size {}, input_shape {}.'.format(num_train, num_val, args.batch_size, input_shape))
     #model.fit_generator(train_data_generator,
@@ -270,6 +269,8 @@ def main(args):
         model = change_input_size(model, *(args.model_input_shape))
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
+        converter.inference_input_type = tf.uint8
+        converter.inference_output_type = tf.uint8
         quantized_tflite_model = converter.convert()
         quantized_tflite_file = pathlib.Path('trained_final_uint8.tflite')
         quantized_tflite_file.write_bytes(quantized_tflite_model)
