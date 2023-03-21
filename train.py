@@ -51,7 +51,7 @@ def save_quantized_model(model, log_dir, epoch=1):
 
     model2save = change_input_size(model2save, *(args.model_input_shape))
 
-    keras.save_model(model2save, os.path.join(log_dir, f'trained_{epoch}.h5'))
+    tf.keras.save_model(model2save, os.path.join(log_dir, f'trained_{epoch}.h5'))
     
     converter = tf.lite.TFLiteConverter.from_keras_model(model2save)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
