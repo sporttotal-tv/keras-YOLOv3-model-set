@@ -44,13 +44,16 @@ def change_input_size(model,h,w,ch=3):
 def save_quantized_model(model, log_dir, epoch=1):
     os.makedirs(log_dir, exist_ok=True)    
 
-    model = tf.keras.Model(
+    model2save = tf.keras.Model(
         model.get_layer('image_input').input,
         [model.get_layer('quant_predict_conv_1').output, 
             model.get_layer('quant_predict_conv_2').output])
 
-    model = change_input_size(model, *(args.model_input_shape))
-    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    model2save = change_input_size(model2save, *(args.model_input_shape))
+
+    keras.save_model(model2save, os.path.join(log_dir, f'trained_{epoch}.h5'))
+    
+    converter = tf.lite.TFLiteConverter.from_keras_model(model2save)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.inference_input_type = tf.uint8
     converter.inference_output_type = tf.uint8
