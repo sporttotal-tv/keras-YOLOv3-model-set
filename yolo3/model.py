@@ -11,6 +11,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras.layers import Input, Lambda
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
+from tensorflow_addons.optimizers import AdamW
 
 from yolo3.models.yolo3_darknet import yolo3_body, custom_tiny_yolo3_body, thin_custom_tiny_yolo3_body, yolo3lite_body, tiny_yolo3lite_body, custom_yolo3_spp_body
 from yolo3.models.yolo3_mobilenet import yolo3_mobilenet_body, tiny_yolo3_mobilenet_body, yolo3lite_mobilenet_body, yolo3lite_spp_mobilenet_body, tiny_yolo3lite_mobilenet_body
@@ -252,7 +253,7 @@ def get_yolo3_model(model_type, num_feature_layers, num_anchors, num_classes, in
 
 
 
-def get_yolo3_train_model(model_type, anchors, num_classes, quantize_aware_training=False, weights_path=None, freeze_level=1, optimizer=Adam(learning_rate=1e-3, weight_decay=0), label_smoothing=0, elim_grid_sense=False, model_pruning=False, pruning_end_step=10000):
+def get_yolo3_train_model(model_type, anchors, num_classes, quantize_aware_training=False, weights_path=None, freeze_level=1, optimizer=AdamW(learning_rate=1e-3, weight_decay=0), label_smoothing=0, elim_grid_sense=False, model_pruning=False, pruning_end_step=10000):
     '''create the training model, for YOLOv3'''
     #K.clear_session() # get a new session
     num_anchors = len(anchors)
