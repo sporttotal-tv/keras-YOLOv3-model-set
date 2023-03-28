@@ -84,7 +84,7 @@ def validate_yolo_model_tflite(interpreter, image_file, anchors, class_names, el
 
     prediction = []
     for output_detail in output_details:
-        output_data = interpreter.get_tensor(output_detail['index'])
+        output_data = interpreter.get_tensor(output_detail['index']).astype(float)
         if uint8_mode:
             scale = output_detail['quantization'][0] 
             zero_point = output_detail['quantization'][1]
