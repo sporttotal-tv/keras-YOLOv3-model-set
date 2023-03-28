@@ -218,40 +218,40 @@ def thin_tiny_yolo3_body(inputs, num_anchors, num_classes):
     '''Create Tiny YOLO_v3 model CNN body in keras.'''
     #feature map 2 (26x26x256 for 416 input)
     f2 = compose(
-            DarknetConv2D_BN_Leaky(16/4, (3,3)),
+            DarknetConv2D_BN_Leaky(16//4, (3,3)),
             MaxPooling2D(pool_size=(2,2), strides=(2,2), padding='same'),
-            DarknetConv2D_BN_Leaky(32/4, (3,3)),
+            DarknetConv2D_BN_Leaky(32//4, (3,3)),
             MaxPooling2D(pool_size=(2,2), strides=(2,2), padding='same'),
-            DarknetConv2D_BN_Leaky(64/4, (3,3)),
+            DarknetConv2D_BN_Leaky(64//4, (3,3)),
             MaxPooling2D(pool_size=(2,2), strides=(2,2), padding='same'),
-            DarknetConv2D_BN_Leaky(128/4, (3,3)),
+            DarknetConv2D_BN_Leaky(128//4, (3,3)),
             MaxPooling2D(pool_size=(2,2), strides=(2,2), padding='same'),
-            DarknetConv2D_BN_Leaky(256/4, (3,3)))(inputs)
+            DarknetConv2D_BN_Leaky(256//4, (3,3)))(inputs)
 
     #feature map 1 (13x13x1024 for 416 input)
     f1 = compose(
             MaxPooling2D(pool_size=(2,2), strides=(2,2), padding='same'),
-            DarknetConv2D_BN_Leaky(512/4, (3,3)),
+            DarknetConv2D_BN_Leaky(512//4, (3,3)),
             MaxPooling2D(pool_size=(2,2), strides=(1,1), padding='same'),
-            DarknetConv2D_BN_Leaky(1024/4, (3,3)))(f2)
+            DarknetConv2D_BN_Leaky(1024//4, (3,3)))(f2)
 
     #feature map 1 transform
-    x1 = DarknetConv2D_BN_Leaky(256/4, (1,1))(f1)
+    x1 = DarknetConv2D_BN_Leaky(256//4, (1,1))(f1)
 
     #feature map 1 output (13x13 for 416 input)
     y1 = compose(
-            DarknetConv2D_BN_Leaky(512/4, (3,3)),
+            DarknetConv2D_BN_Leaky(512//4, (3,3)),
             DarknetConv2D(num_anchors*(num_classes+5), (1,1), name='predict_conv_1'))(x1)
 
     #upsample fpn merge for feature map 1 & 2
     x2 = compose(
-            DarknetConv2D_BN_Leaky(128/4, (1,1)),
+            DarknetConv2D_BN_Leaky(128//4, (1,1)),
             UpSampling2D(2))(x1)
 
     #feature map 2 output (26x26 for 416 input)
     y2 = compose(
             Concatenate(),
-            DarknetConv2D_BN_Leaky(256/4, (3,3)),
+            DarknetConv2D_BN_Leaky(256//4, (3,3)),
             DarknetConv2D(num_anchors*(num_classes+5), (1,1), name='predict_conv_2'))([x2, f2])
 
     return Model(inputs, [y1,y2])

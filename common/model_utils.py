@@ -2,6 +2,7 @@
 # -*- coding=utf-8 -*-
 """Model utility functions."""
 from tensorflow.keras.optimizers import Adam, RMSprop, SGD
+from tensorflow_addons.optimizers import AdamW
 from tensorflow.keras.optimizers.schedules import ExponentialDecay, PolynomialDecay, PiecewiseConstantDecay
 from tensorflow.keras.experimental import CosineDecay
 from tensorflow_model_optimization.sparsity import keras as sparsity
