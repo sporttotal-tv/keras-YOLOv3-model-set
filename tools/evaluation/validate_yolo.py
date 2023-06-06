@@ -396,8 +396,19 @@ def handle_prediction(prediction, image_file, image, image_shape, anchors, class
         os.makedirs(output_path, exist_ok=True)
         output_file = os.path.join(output_path, os.path.basename(image_file))
         Image.fromarray(image).save(output_file)
+        
+        # log the output in Yolov5 format
+        with open(output_file + '.txt', 'w') as f:
+            for box, cls, score in zip(boxes, classes, scores):
+                xmin, ymin, xmax, ymax = box
+                x_center = x_min + (x_max - x_min) / 2
+                y_center = y_min + (y_max - y_min) / 2
+                width = x_max - x_min
+                height = y_max - y_min
+                f.write('{} {} {} {} {} {}\n'.format(class_names[cls], score, x_center, y_center, width, height)
     else:
         Image.fromarray(image).show()
+    
     return
 
 
