@@ -401,11 +401,11 @@ def handle_prediction(prediction, image_file, image, image_shape, anchors, class
         with open(output_file + '.txt', 'w') as f:
             for box, cls, score in zip(boxes, classes, scores):
                 xmin, ymin, xmax, ymax = box
-                x_center = x_min + (x_max - x_min) / 2
-                y_center = y_min + (y_max - y_min) / 2
-                width = x_max - x_min
-                height = y_max - y_min
-                f.write('{} {} {} {} {} {}\n'.format(class_names[cls], score, x_center, y_center, width, height)
+                xmin /= image_shape[1]
+                xmax /= image_shape[1]
+                ymin /= image_shape[0]
+                ymax /= image_shape[0]
+                f.write('{} {} {} {} {} {}\n'.format(class_names[cls], score, xmin, ymin, xmax, ymax))
     else:
         Image.fromarray(image).show()
     
