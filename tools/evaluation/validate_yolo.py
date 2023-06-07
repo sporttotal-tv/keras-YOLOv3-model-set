@@ -397,15 +397,17 @@ def handle_prediction(prediction, image_file, image, image_shape, anchors, class
         output_file = os.path.join(output_path, os.path.basename(image_file))
         Image.fromarray(image).save(output_file)
         
+        output_annotation_file = os.path.splitext(output_file)[0] + '.txt'
+
         # log the output in Yolov5 format
-        with open(output_file + '.txt', 'w') as f:
+        with open(output_annotation_file, 'w') as f:
             for box, cls, score in zip(boxes, classes, scores):
                 xmin, ymin, xmax, ymax = box
                 xmin /= image_shape[1]
                 xmax /= image_shape[1]
                 ymin /= image_shape[0]
                 ymax /= image_shape[0]
-                f.write('{} {} {} {} {} {}\n'.format(class_names[cls], score, xmin, ymin, xmax, ymax))
+                f.write('{} {} {} {} {} {}\n'.format(cls, score, xmin, ymin, xmax, ymax))
     else:
         Image.fromarray(image).show()
     
