@@ -511,7 +511,9 @@ def main():
 
     # get image file list or single image
     if os.path.isdir(args.image_path):
-        image_files = glob.glob(os.path.join(args.image_path, '*'))
+        img_extensions = ['*.png', '*.jpg', '*.jpeg', '*.gif']
+        image_files = [file for ext in img_extensions 
+                       for file in glob.glob(os.path.join(args.image_path, ext))]
         assert args.output_path, 'need to specify output path if you use image directory as input.'
     else:
         image_files = [args.image_path]
