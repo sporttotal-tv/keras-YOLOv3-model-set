@@ -91,6 +91,25 @@ def calculate_metrics(pred_dir, gt_dir, bbox_format):
     cocoEval.summarize()
 
 
+    # Calculate mAP for each class:
+    for key, value in class_name_to_id.items():
+        print("---------------")
+        print("mAP FOR CLASS {}".format(key))
+
+        gt_class_anns = [anno for anno in gt_anns if anno["category_id"] == value]
+        pred_class_anns = [anno for anno in pred_anns if anno["category_id"] == value]
+        coco_gt = COCO()
+        coco_gt.dataset = {"annotations": gt_class_anns, "images": images, "categories": categories}
+        coco_gt.createIndex()
+
+        coco_dt = coco_gt.loadRes(pred_class_anns)
+
+        cocoEval = COCOeval(cocoGt=coco_gt, cocoDt=coco_dt, iouType='bbox')
+        cocoEval.evaluate()
+        cocoEval.accumulate()
+        cocoEval.summarize()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Calculate COCO Metrics')
     parser.add_argument('pred_dir', type=str, help='Directory path for prediction files')
